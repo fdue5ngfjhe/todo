@@ -1,4 +1,4 @@
-import { Task, CreateTaskInput } from "./types";
+import { Task, CreateTaskInput, UpdateTaskInput } from "./types";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:3001";
@@ -124,4 +124,54 @@ export async function createTask(input: CreateTaskInput): Promise<Task> {
   }
 
   return data as Task;
+}
+
+export async function updateTask(
+  id: number,
+  input: UpdateTaskInput
+): Promise<Task> {
+  const res = await fetch(`${API_URL}/api/tasks/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+
+  if (!res.ok) {
+    if (res.status === 404) {
+      throw new Error("وظیفه مورد نظر یافت نشد");
+    }
+    const data = await res.json().catch(() => ({}));
+    const message = data?.title?.[0] || data?.message || "خطا در ویرایش وظیفه";
+    throw new Error(message);
+  }
+
+  return res.json();
+}
+
+export async function deleteTask(id: number): Promise<void> {
+  const res = await fetch(`${API_URL}/api/tasks/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!res.ok) {
+    if (res.status === 404) {
+      throw new Error("وظیفه مورد نظر یافت نشد");
+    }
+    throw new Error("خطا در حذف وظیفه");
+  }
+}
+
+export async function toggleTaskStatus(id: number): Promise<Task> {
+  const res = await fetch(`${API_URL}/api/tasks/${id}/toggle`, {
+    method: "PATCH",
+  });
+
+  if (!res.ok) {
+    if (res.status === 404) {
+      throw new Error("وظیفه مورد نظر یافت نشد");
+    }
+    throw new Error("خطا در تغییر وضعیت");
+  }
+
+  return res.json();
 }
