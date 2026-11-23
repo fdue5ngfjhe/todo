@@ -20,7 +20,7 @@ export default function TaskList() {
       const totalEl = document.getElementById("total-tasks");
       const pendingEl = document.getElementById("pending-tasks");
       const completedEl = document.getElementById("completed-tasks");
-      
+
       if (totalEl) totalEl.textContent = String(data.length);
       if (pendingEl)
         pendingEl.textContent = String(
@@ -38,7 +38,20 @@ export default function TaskList() {
   };
 
   useEffect(() => {
+    // بارگذاری اولیه
     loadTasks();
+
+    // گوش دادن به رویدادی که فرم ثبت می‌فرستد
+    const handleRefresh = () => {
+      loadTasks();
+    };
+
+    window.addEventListener("tasks:refresh", handleRefresh);
+
+    // پاکسازی هنگام unmount شدن کامپوننت
+    return () => {
+      window.removeEventListener("tasks:refresh", handleRefresh);
+    };
   }, []);
 
   return (
